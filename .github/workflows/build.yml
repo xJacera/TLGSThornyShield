@@ -31,13 +31,19 @@ jobs:
         run: gradle build --no-daemon 2>&1 | tee build_output.log
         continue-on-error: true
 
-      - name: Report failure as commit comment
-        if: steps.build.outcome == 'failure'
+      - name: Diagnostic listing
+        if: always()
+        run: |
+          echo "=== build/libs contents ===" >> build_output.log
+          find build -maxdepth 3 -type f >> build_output.log 2>&1 || echo "no build dir" >> build_output.log
+
+      - name: Report build log as commit comment
+        if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tail -c 60000 build_output.log > trimmed_output.log
-          python3 -c "import json; content=open('trimmed_output.log').read(); print(json.dumps({'body': '### Build failed\n\`\`\`\n' + content + '\n\`\`\`'}))" > payload.json
+          python3 -c "import json; content=open('trimmed_output.log').read(); print(json.dumps({'body': '### Build log (outcome: ${{ steps.build.outcome }})\n\`\`\`\n' + content + '\n\`\`\`'}))" > payload.json
           curl -s -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
@@ -49,6 +55,7 @@ jobs:
         run: exit 1
 
       - name: Upload built jar
+        if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: thorned-shields-jar
