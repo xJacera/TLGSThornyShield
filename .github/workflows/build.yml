@@ -36,17 +36,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tail -c 60000 build_output.log > trimmed_output.log
-          BODY=$(python3 -c "
-import json
-with open('trimmed_output.log') as f:
-    content = f.read()
-print(json.dumps({'body': '### Build failed\n\`\`\`\n' + content + '\n\`\`\`'}))
-")
+          python3 -c "import json; content=open('trimmed_output.log').read(); print(json.dumps({'body': '### Build failed\n\`\`\`\n' + content + '\n\`\`\`'}))" > payload.json
           curl -s -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/comments" \
-            -d "$BODY"
+            -d @payload.json
 
       - name: Fail job if build failed
         if: steps.build.outcome == 'failure'
