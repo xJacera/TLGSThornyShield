@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,7 +26,31 @@ jobs:
           gradle-version: '8.10'
 
       - name: Build plugin jar
-        run: gradle build --no-daemon
+        id: build
+        run: gradle build --no-daemon 2>&1 | tee build_output.log
+        continue-on-error: true
+
+      - name: Report failure as commit comment
+        if: steps.build.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tail -c 60000 build_output.log > trimmed_output.log
+          BODY=$(python3 -c "
+import json
+with open('trimmed_output.log') as f:
+    content = f.read()
+print(json.dumps({'body': '### Build failed\n\`\`\`\n' + content + '\n\`\`\`'}))
+")
+          curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/comments" \
+            -d "$BODY"
+
+      - name: Fail job if build failed
+        if: steps.build.outcome == 'failure'
+        run: exit 1
 
       - name: Upload built jar
         uses: actions/upload-artifact@v4
