@@ -1,0 +1,6 @@
+name: ThornedShields
+version: '${version}'
+main: com.thornedshields.paper.ThornedShieldsPlugin
+api-version: '26.2'
+author: Reliable Steel Erectors
+description: Allows the Thorns enchantment to work on Shields (Paper port of ales' Thorned Shields).

@@ -1,0 +1,23 @@
+# ThornedShields configuration
+# Ported from ales' Thorned Shields (Fabric) defaults.
+
+enabled: true
+
+# Chance (in %) for a shield with Thorns I/II/III to activate when blocking.
+blocking-chance-thorns-1: 50
+blocking-chance-thorns-2: 75
+blocking-chance-thorns-3: 100
+
+# Amount of damage reflected to the attacker (2.0 = 1 heart).
+blocking-damage-thorns-1: 2.0
+blocking-damage-thorns-2: 4.0
+blocking-damage-thorns-3: 6.0
+
+# Whether blocking with Thorns should consume shield durability.
+blocking-durability-consumption: true
+# Amount of durability consumed when Thorns activates.
+blocking-durability-consumption-amount: 2
+
+# Allow combining a Thorns book onto a shield in an anvil.
+# (Vanilla normally rejects this since Thorns' enchantment category is armor-only.)
+allow-anvil-application: true
