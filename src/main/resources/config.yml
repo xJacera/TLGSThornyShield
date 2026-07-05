@@ -19,5 +19,7 @@ blocking-durability-consumption: true
 blocking-durability-consumption-amount: 2
 
 # Allow combining a Thorns book onto a shield in an anvil.
-# (Vanilla normally rejects this since Thorns' enchantment category is armor-only.)
-allow-anvil-application: true
+# Default is OFF: this is a limited-edition event reward enchant, not
+# something any player should be able to craft themselves. Give it out
+# with /thornshield give <player> [level] instead.
+allow-anvil-application: false

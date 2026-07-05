@@ -11,6 +11,7 @@ public final class ThornedShieldsPlugin extends JavaPlugin {
         saveDefaultConfig();
         reloadThornedShieldsConfig();
         getServer().getPluginManager().registerEvents(new ThornedShieldsListener(this), this);
+        getCommand("thornshield").setExecutor(new ThornShieldCommand(this));
         getLogger().info("ThornedShields enabled - Thorns now works on Shields.");
     }
 
