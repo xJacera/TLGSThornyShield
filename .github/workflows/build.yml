@@ -61,23 +61,15 @@ jobs:
           name: thorned-shields-jar
           path: build/libs/*.jar
 
-      - name: Publish jar as a GitHub Release asset
+      - name: Commit jar into repo for direct download
         if: steps.build.outcome == 'success'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="build-${{ github.run_number }}"
-          JAR_PATH=$(ls build/libs/*-all.jar | head -n1)
-          JAR_NAME=$(basename "$JAR_PATH")
-          curl -s -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/releases" \
-            -d "{\"tag_name\":\"$TAG\",\"name\":\"$TAG\",\"body\":\"Automated build\"}" > release.json
-          UPLOAD_URL=$(python3 -c "import json; print(json.load(open('release.json'))['upload_url'].split('{')[0])")
-          curl -s -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Content-Type: application/java-archive" \
-            --data-binary @"$JAR_PATH" \
-            "$UPLOAD_URL?name=$JAR_NAME" > asset.json
-          cat asset.json
+          mkdir -p dist
+          cp build/libs/*-all.jar dist/thorned-shields-1.0.0-all.jar
+          git config user.email "actions@github.com"
+          git config user.name "github-actions"
+          git add dist/thorned-shields-1.0.0-all.jar
+          git commit -m "Add built jar [skip ci]" || echo "nothing to commit"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:${{ github.ref_name }}"
